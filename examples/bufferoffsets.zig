@@ -1,7 +1,7 @@
 const std = @import("std");
 const sk = @cImport({
     @cInclude("sokol.h");
-    @cInclude("shaders/test.glsl.h");
+    @cInclude("shaders/bufferoffsets.glsl.h");
 });
 const print = std.debug.print;
 
