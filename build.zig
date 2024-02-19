@@ -28,7 +28,7 @@ const examples = .{
     "cube",
     "bufferoffsets",
     "noninterleaved",
-    //"texcube",
+    "texcube",
     //"blend",
     //"offscreen",
     //"instancing",
@@ -48,11 +48,11 @@ const example_shaders = .{
     "cube.glsl",
     "bufferoffsets.glsl",
     "noninterleaved.glsl",
+    "texcube.glsl",
     //"instancing.glsl",
     //"mrt.glsl",
     //"offscreen.glsl",
     //"shapes.glsl",
-    //"texcube.glsl",
     //"blend.glsl",
 };
 
