@@ -1,7 +1,7 @@
 const std = @import("std");
 const sk = @cImport({
     @cInclude("sokol.h");
-    @cInclude("shaders/test.glsl.h");
+    @cInclude("shaders/quad.glsl.h");
 });
 const print = std.debug.print;
 
@@ -50,12 +50,15 @@ export fn init() void {
 
     pass_action.colors[0] = .{
         .load_action = sk.SG_LOADACTION_CLEAR,
-        .clear_value = .{ .r = 0, .g = 0, .b = 0, .a = 1 },
+        .clear_value = .{ .r = 0.2, .g = 0.5, .b = 0, .a = 1 },
     };
     print("Backend: {}\n", .{sk.sg_query_backend()});
 }
 
 export fn frame() void {
+    const b = pass_action.colors[0].clear_value.b + 0.01;
+    pass_action.colors[0].clear_value.b = if(b > 1.0) 0.0 else b;
+
     sk.sg_begin_default_pass(&pass_action, sk.sapp_width(), sk.sapp_height());
     sk.sg_apply_pipeline(pip);
     sk.sg_apply_bindings(&bind);

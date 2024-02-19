@@ -1,7 +1,7 @@
 const std = @import("std");
 const sk = @cImport({
     @cInclude("sokol.h");
-    @cInclude("shaders/test.glsl.h");
+    @cInclude("shaders/triangle.glsl.h");
 });
 const print = std.debug.print;
 
@@ -15,35 +15,17 @@ export fn init() void {
         .logger = .{.func = sk.slog_func},
     });
     const vertices = [_]f32 {
-        // positions       // colors
-        -0.5,  0.5, 0.5,     1.0, 0.0, 0.0, 1.0,
-         0.5,  0.5, 0.5,     0.0, 1.0, 0.0, 1.0,
-         0.5, -0.5, 0.5,     0.0, 0.0, 1.0, 1.0,
-        -0.5, -0.5, 0.5,     1.0, 1.0, 0.0, 1.0,
+        // positions    // colors
+        0.0, 0.5, 0.5,  1.0, 0.0, 0.0, 1.0,
+        0.5,-0.5, 0.5,  0.0, 1.0, 0.0, 1.0,
+       -0.5,-0.5, 0.5,  0.0, 0.0, 1.0, 1.0,
     };
-    const vbuf = sk.sg_make_buffer(&sk.sg_buffer_desc{
+    bind.vertex_buffers[0] = sk.sg_make_buffer(&sk.sg_buffer_desc{
         .data = sk.SG_RANGE(vertices),
-        .label = "cube-vertices"
+        .label = "triangle-vertices"
     });
-    const indices = [_]u16 {
-        0, 1, 2,  0, 2, 3,
-    };
-    const ibuf = sk.sg_make_buffer(&sk.sg_buffer_desc{
-        .type = sk.SG_BUFFERTYPE_INDEXBUFFER,
-        .data = sk.SG_RANGE(indices),
-        .label = "quad-indices",
-    });
-
-    bind.vertex_buffers[0] = vbuf;
-    bind.index_buffer = ibuf;
-
-    const shd = sk.sg_make_shader(sk.quad_shader_desc(sk.sg_query_backend()));
-    var pip_desc: sk.sg_pipeline_desc = .{
-        .shader = shd,
-        .index_type = sk.SG_INDEXTYPE_UINT16,
-        .label = "quad-pipline",
-    };
-
+    const shd = sk.sg_make_shader(sk.triangle_shader_desc(sk.sg_query_backend()));
+    var pip_desc: sk.sg_pipeline_desc = .{.shader = shd};
     pip_desc.layout.attrs[sk.ATTR_vs_position].format = sk.SG_VERTEXFORMAT_FLOAT3;
     pip_desc.layout.attrs[sk.ATTR_vs_color0].format = sk.SG_VERTEXFORMAT_FLOAT4;
     pip = sk.sg_make_pipeline(&pip_desc);
@@ -56,10 +38,13 @@ export fn init() void {
 }
 
 export fn frame() void {
+    const g = pass_action.colors[0].clear_value.g + 0.01;
+    pass_action.colors[0].clear_value.g = if(g > 1.0) 0.0 else g;
+
     sk.sg_begin_default_pass(&pass_action, sk.sapp_width(), sk.sapp_height());
     sk.sg_apply_pipeline(pip);
     sk.sg_apply_bindings(&bind);
-    sk.sg_draw(0, 6, 1);
+    sk.sg_draw(0, 3, 1);
     sk.sg_end_pass();
     sk.sg_commit();
 }
@@ -76,7 +61,7 @@ pub fn main() void {
             .cleanup_cb = cleanup,
             .width = 400,
             .height = 300,
-            .window_title = "Quad (sokol-app)",
+            .window_title = "Triangle (sokol-app)",
             .icon = .{
                 .sokol_default = true,
             },
