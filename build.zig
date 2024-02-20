@@ -30,17 +30,69 @@ const examples = .{
     "noninterleaved",
     "texcube",
     "shapes",
-    //"blend",
-    //"offscreen",
+    "shapes-transform",
+    "offscreen",
+    //"offscreen-msaa",
     //"instancing",
     //"mrt",
-    //"saudio",
-    //"sgl",
-    //"sgl-context",
-    //"sgl-points",
+    //"mrt-pixelformats",
+    //"arraytex",
+    //"tex3d",
+    //"dyntex",
+    //"basisu",
+    //"cubemap-jpeg",
+    //"cubemaprt",
+    //"miprender",
+    //"layerrender",
+    //"primtypes",
+    //"uvwrap",
+    //"mipmap",
+    //"uniformtypes",
+    //"blend",
+    //"sdf",
+    //"shadows",
+    //"shadows-depthtex",
+    //"imgui",
+    //"imgui-dock",
+    //"imgui-highdpi",
+    //"cimgui",
+    //"imgui-images",
+    //"imgui-usercallback",
+    //"nuklear",
+    //"nuklear-images",
+    //"sgl-microui",
+    //"fontstash",
+    //"fontstash-layers",
     //"debugtext",
-    //"debugtext-print",
+    //"debugtext-printf",
     //"debugtext-userfont",
+    //"debugtext-context",
+    //"debugtext-layers",
+    //"events",
+    //"icon",
+    //"droptest",
+    //"pixelformats",
+    //"drawcallperf",
+    //"saudio",
+    //"modplay",
+    //"noentry",
+    //"restart",
+    //"sgl",
+    //"sgl-lines",
+    //"sgl-points",
+    //"sgl-context",
+    //"loadpng",
+    //"plmpeg",
+    //"cgltf",
+    //"ozz-anim",
+    //"ozz-skin",
+    //"shdfeatures",
+    //"spine-simple",
+    //"spine-inspector",
+    //"spine-layers",
+    //"spine-skinsets",
+    //"spine-switch-skinsets",
+    //"spine-contexts",
 };
 const example_shaders = .{
     "triangle.glsl",
@@ -50,9 +102,10 @@ const example_shaders = .{
     "noninterleaved.glsl",
     "texcube.glsl",
     "shapes.glsl",
+    "shapes-transform.glsl",
+    "offscreen.glsl",
     //"instancing.glsl",
     //"mrt.glsl",
-    //"offscreen.glsl",
     //"blend.glsl",
 };
 
@@ -152,7 +205,6 @@ fn buildExample(b: *Build, comptime dir: []const u8, comptime name: []const u8, 
         inline for(user_h_dirs) |dd| {
             if(dd.len > 0) example.addIncludePath(.{.path = dd});
         }
-
 
         b.installArtifact(example);
         run = b.addRunArtifact(example);
@@ -374,6 +426,8 @@ pub fn emLinkStep(b: *Build, options: EmLinkOptions) !*Build.Step.Run {
     try emcc_cmd.append(emcc_path);
     if (options.optimize == .Debug) {
         try emcc_cmd.append("-Og");
+        try emcc_cmd.append("-sSAFE_HEAP=1");
+        try emcc_cmd.append("-sSTACK_OVERFLOW_CHECK=1");
     } else {
         try emcc_cmd.append("-sASSERTIONS=0");
         if (options.optimize == .ReleaseSmall) {

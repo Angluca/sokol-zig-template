@@ -42,8 +42,8 @@ export fn init() void {
     pip_desc.layout.attrs[3] = sk.sshape_color_vertex_attr_state();
     pip = sk.sg_make_pipeline(&pip_desc);
 
-    const vertices = [_]sk.sshape_vertex_t{.{}} ** (6 * 1024);
-    const indices = [_]u16{0} ** (16 * 1024);
+    const vertices: [6 * 1024]sk.sshape_vertex_t = undefined;
+    const indices: [16 * 1024]u16 = undefined;
     var buf = sk.sshape_buffer_t {
         .vertices = .{.buffer = sk.SSHAPE_RANGE(vertices)},
         .indices = .{.buffer = sk.SSHAPE_RANGE(indices)},

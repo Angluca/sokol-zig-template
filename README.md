@@ -21,10 +21,10 @@ sokol.h: You can use it add headers
 Add headers dictionary and build c files in build.zig
 ```zig
 var user_h_dirs = .{
-    "src/lib",
+    "new_dir/lib",
 };
 var user_c_files = .{
-    "src/lib/nuklear.c",
+    "new_dir/lib/nuklear.c",
 };
 ```
 

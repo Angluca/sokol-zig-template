@@ -63,8 +63,9 @@ export fn init() void {
     shapes[setoi(.SPHERE)].pos = sk.HMM_Vec3(-2.0, -1, 0);
     shapes[setoi(.CYLINDER)].pos = sk.HMM_Vec3(2.0, -1, 0);
     shapes[setoi(.TORUS)].pos = sk.HMM_Vec3(0, -1, 0);
-    const vertices = [_]sk.sshape_vertex_t{.{}} ** (6 * 1024);
-    const indices = [_]u16{0} ** (16 * 1024);
+
+    const vertices: [6 * 1024]sk.sshape_vertex_t = undefined;
+    const indices: [16 * 1024]u16 = undefined;
     var buf = sk.sshape_buffer_t {
         .vertices = .{.buffer = sk.SSHAPE_RANGE(vertices)},
         .indices = .{.buffer = sk.SSHAPE_RANGE(indices)},
