@@ -29,6 +29,7 @@ const examples = .{
     "bufferoffsets",
     "noninterleaved",
     "texcube",
+    "shapes",
     //"blend",
     //"offscreen",
     //"instancing",
@@ -40,7 +41,6 @@ const examples = .{
     //"debugtext",
     //"debugtext-print",
     //"debugtext-userfont",
-    //"shapes",
 };
 const example_shaders = .{
     "triangle.glsl",
@@ -49,10 +49,10 @@ const example_shaders = .{
     "bufferoffsets.glsl",
     "noninterleaved.glsl",
     "texcube.glsl",
+    "shapes.glsl",
     //"instancing.glsl",
     //"mrt.glsl",
     //"offscreen.glsl",
-    //"shapes.glsl",
     //"blend.glsl",
 };
 
