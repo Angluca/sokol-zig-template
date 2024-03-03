@@ -1,7 +1,16 @@
 const std = @import("std");
 const sk = @cImport({
-    @cInclude("sokol.h");
-    @cInclude("shaders/test.glsl.h");
+    //@cInclude("sokol.h");
+    @cInclude("sokol_app.h");
+    @cInclude("sokol_gfx.h");
+    @cInclude("sokol_glue.h");
+    @cInclude("sokol_log.h");
+    @cInclude("shaders/main.glsl.h");
+});
+const hm = @cImport({
+    //@cDefine("HANDMADE_MATH_IMPLEMENTATION", {});
+    //@cDefine("HANDMADE_MATH_NO_SSE", {});
+    @cInclude("HandmadeMath.h");
 });
 const print = std.debug.print;
 
@@ -10,6 +19,9 @@ var bind: sk.sg_bindings = .{};
 var pass_action: sk.sg_pass_action = .{};
 
 export fn init() void {
+    const testVec = hm.HMM_Vec3(0.1, 1.0, 1.1);
+    print("vec = {any}\n", .{testVec.Elements});
+
     sk.sg_setup(&sk.sg_desc{
         .context = sk.sapp_sgcontext(),
         .logger = .{.func = sk.slog_func},
@@ -24,7 +36,7 @@ export fn init() void {
         .data = sk.SG_RANGE(vertices),
         .label = "triangle-vertices"
     });
-    const shd = sk.sg_make_shader(sk.test_shader_desc(sk.sg_query_backend()));
+    const shd = sk.sg_make_shader(sk.main_shader_desc(sk.sg_query_backend()));
     var pip_desc: sk.sg_pipeline_desc = .{.shader = shd};
     pip_desc.layout.attrs[sk.ATTR_vs_position].format = sk.SG_VERTEXFORMAT_FLOAT3;
     pip_desc.layout.attrs[sk.ATTR_vs_color0].format = sk.SG_VERTEXFORMAT_FLOAT4;
@@ -49,12 +61,11 @@ export fn frame() void {
     sk.sg_commit();
 }
 
-export fn events(event: ?*const sk.sapp_event) void {
-    const ev = event.?;
+export fn event(e: ?*const sk.sapp_event) void {
+    const ev = e.?;
     if(ev.type == sk.SAPP_EVENTTYPE_KEY_DOWN) {
         switch(ev.key_code) {
-            sk.SAPP_KEYCODE_1 => print("1\n",.{}),
-            sk.SAPP_KEYCODE_2 => print("2\n",.{}),
+            sk.SAPP_KEYCODE_ESCAPE => sk.sapp_quit(),
             else => |keycode| print("{any} ",.{keycode}),
         }
     }
@@ -70,7 +81,7 @@ pub fn main() void {
             .init_cb = init,
             .frame_cb = frame,
             .cleanup_cb = cleanup,
-            .event_cb = events,
+            .event_cb = event,
             .width = 400,
             .height = 300,
             .window_title = "main (sokol-app)",

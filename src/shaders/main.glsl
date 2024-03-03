@@ -19,4 +19,4 @@ void main() {
 }
 @end
 
-@program test vs fs
+@program main vs fs

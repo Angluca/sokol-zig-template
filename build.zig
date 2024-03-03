@@ -18,8 +18,9 @@ const user_c_files = .{
 
 
 const main_shaders = .{
-    "test.glsl",
+    "main.glsl",
 };
+
 // the integrated examples
 const examples = .{
     "clear",
@@ -32,7 +33,7 @@ const examples = .{
     "shapes",
     "shapes-transform",
     "offscreen",
-    //"offscreen-msaa",
+    "offscreen-msaa",
     //"instancing",
     //"mrt",
     //"mrt-pixelformats",
@@ -94,20 +95,6 @@ const examples = .{
     //"spine-switch-skinsets",
     //"spine-contexts",
 };
-const example_shaders = .{
-    "triangle.glsl",
-    "quad.glsl",
-    "cube.glsl",
-    "bufferoffsets.glsl",
-    "noninterleaved.glsl",
-    "texcube.glsl",
-    "shapes.glsl",
-    "shapes-transform.glsl",
-    "offscreen.glsl",
-    //"instancing.glsl",
-    //"mrt.glsl",
-    //"blend.glsl",
-};
 
 pub const SokolBackend = enum {
     auto, // Windows: D3D11, macOS/iOS: Metal, otherwise: GL
@@ -161,9 +148,11 @@ pub fn build(b: *Build) !void {
             .emsdk = emsdk,
         });
         // a manually invoked build step to recompile shaders via sokol-shdc
-        buildShaders(b, shaders_dir, main_shaders);
+        inline for (main_shaders) |name| {
+            buildShader(b, shaders_dir, name);
+        }
     } else {
-        inline for (examples) |name| {
+        inline for (examples, 0..) |name ,i| {
             try buildExample(b, examples_dir, name, .{
                 .target = target,
                 .optimize = optimize,
@@ -171,9 +160,10 @@ pub fn build(b: *Build) !void {
                 .mod_sokol = mod_sokol,
                 .emsdk = emsdk,
             });
+            if(i == 0) continue; // clear havn't glsl
+            buildShader(b, examples_dir ++ "/shaders", name ++ ".glsl");
         }
 
-        buildShaders(b, examples_dir ++ "/shaders", example_shaders);
     }
 }
 
@@ -539,7 +529,7 @@ fn emSdkSetupStep(b: *Build, emsdk: *Build.Dependency) !?*Build.Step.Run {
 // a separate step to compile shaders, expects the shader compiler in ../sokol-tools-bin/
 // TODO: install sokol-shdc via package manager
 var shdc_step: ?*std.Build.Step = null;
-fn buildShaders(b: *Build, comptime dir: []const u8, comptime shaders: anytype) void {
+fn buildShader(b: *Build, comptime dir: []const u8, comptime shader: []const u8) void {
     const optional_shdc: ?[:0]const u8 = comptime switch (builtin.os.tag) {
         .windows => "win32/sokol-shdc.exe",
         .linux => "linux/sokol-shdc",
@@ -554,19 +544,17 @@ fn buildShaders(b: *Build, comptime dir: []const u8, comptime shaders: anytype) 
     if(shdc_step == null) {
         shdc_step = b.step("shaders", "Compile shaders (needs " ++ sokol_tools_bin_dir ++ ")");
     }
-    inline for (shaders) |shader| {
-        const cmd = b.addSystemCommand(&.{
-            shdc_path,
-            "-i",
-            dir ++ "/" ++ shader,
-            "-o",
-            dir ++ "/" ++ shader ++ ".h",
-            "-l",
-            "glsl330:metal_macos:hlsl4:glsl300es:wgsl",
-            "-f",
-            "sokol",
-            //"sokol_zig",
-        });
-        shdc_step.?.dependOn(&cmd.step);
-    }
+    const cmd = b.addSystemCommand(&.{
+        shdc_path,
+        "-i",
+        dir ++ "/" ++ shader,
+        "-o",
+        dir ++ "/" ++ shader ++ ".h",
+        "-l",
+        "glsl330:metal_macos:hlsl4:glsl300es:wgsl",
+        "-f",
+        "sokol",
+        //"sokol_zig",
+    });
+    shdc_step.?.dependOn(&cmd.step);
 }
