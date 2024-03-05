@@ -10,10 +10,10 @@ const libs_dir = "libs";
 const web_dir = "libs/web";
 
 const user_h_dirs = .{
-    //"lib/sokol",
+    //"libs/Nuklear"
 };
 const user_c_files = .{
-    //"libs/test.c",
+    //"libs/Nuklear/nuklear.c",
 };
 
 
@@ -34,6 +34,7 @@ const examples = .{
     "shapes-transform",
     "offscreen",
     "offscreen-msaa",
+    //"nuklear",
     //"instancing",
     //"mrt",
     //"mrt-pixelformats",
@@ -59,7 +60,6 @@ const examples = .{
     //"cimgui",
     //"imgui-images",
     //"imgui-usercallback",
-    //"nuklear",
     //"nuklear-images",
     //"sgl-microui",
     //"fontstash",
@@ -152,7 +152,7 @@ pub fn build(b: *Build) !void {
             buildShader(b, shaders_dir, name);
         }
     } else {
-        inline for (examples, 0..) |name ,i| {
+        inline for (examples) |name| {
             try buildExample(b, examples_dir, name, .{
                 .target = target,
                 .optimize = optimize,
@@ -160,8 +160,12 @@ pub fn build(b: *Build) !void {
                 .mod_sokol = mod_sokol,
                 .emsdk = emsdk,
             });
-            if(i == 0) continue; // clear havn't glsl
-            buildShader(b, examples_dir ++ "/shaders", name ++ ".glsl");
+            const f = std.fs.cwd().openFile(examples_dir ++ "/shaders/" ++ name ++ ".glsl", .{.mode = .read_only}) catch null;
+            if(f != null) {
+                buildShader(b, examples_dir ++ "/shaders", name ++ ".glsl");
+                f.?.close();
+            }
+
         }
 
     }
@@ -372,7 +376,10 @@ pub fn buildLibSokol(b: *Build, options: LibSokolOptions) !*Build.Step.Compile {
         .file = if (lib.rootModuleTarget().os.tag == .macos)
             .{.path = libs_dir ++ "/sokol.m"}
         else .{ .path = libs_dir ++ "/sokol.c" },
-        .flags = &.{},
+        .flags = &.{
+            "-std=c99",
+            "-fno-sanitize=undefined",
+        },
     });
 
     inline for(user_h_dirs) |dd| {
